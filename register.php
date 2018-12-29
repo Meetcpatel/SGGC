@@ -5,9 +5,18 @@ if($_GET["regname"] && $_GET["regemail"] && $_GET["regpass1"] && $_GET["regpass2
 {
 	if($_GET["regpass1"]==$_GET["regpass2"])
 	{
-	$servername="localhost";
-    $username="root";
-    $conn=  mysql_connect($servername,$username)or die(mysql_error());
+	$serverName = "tcp:mssqlserver011.database.windows.net";  
+$connectionOptions = array(  
+    "Database" => "mssql",  
+    "UID" => "meet",  
+    "PWD" => "Qwerty123456"  
+);  
+$conn = sqlsrv_connect($serverName, $connectionOptions);  
+  
+if ($conn === false)  
+    {  
+    die(print_r(sqlsrv_errors() , true));  
+    }  
     mysql_select_db("test",$conn);
     $sql="insert into users (name,email,password)values('$_GET[regname]','$_GET[regemail]','$_GET[regpass1]')";
     $result=mysql_query($sql,$conn) or die(mysql_error());		
