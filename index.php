@@ -1,94 +1,66 @@
-<html>  
-<head>  
-<Title>Azure SQL Database - PHP Website</Title>  
-</head>  
-<body>  
-<form method="post" action="?action=add" enctype="multipart/form-data" >  
-Emp Id <input type="text" name="t_emp_id" id="t_emp_id"/></br>  
-Name <input type="text" name="t_name" id="t_name"/></br>  
-Education <input type="text" name="t_education" id="t_education"/></br>  
-E-mail address <input type="text" name="t_email" id="t_email"/></br>  
-<input type="submit" name="submit" value="Submit" />  
-
-<script type="text/javascript" src="http://offtopic.lefora.embed.talkiforum.com/embed/1.js"></script>
-
-
-
-</form>  
-<?php  
-/*Connect using SQL Server authentication.*/  
-$serverName = "tcp:mssqlserver011.database.windows.net";  
-$connectionOptions = array(  
-    "Database" => "mssql",  
-    "UID" => "meet",  
-    "PWD" => "Qwerty123456"  
-);  
-$conn = sqlsrv_connect($serverName, $connectionOptions);  
-  
-if ($conn === false)  
+<html>
+<head>
+<title>login page</title>
+</head>
+<body bgcolor="black" style="color:gray">
+<form action="index.php" method=get>
+<h1 align="center" style="color:gray" >Welcome to this simple application</h1>
+<?php
+session_start(); 
+if( $_SESSION["logging"]&& $_SESSION["logged"])
+{
+     print_secure_content();
+}
+else {
+    if(!$_SESSION["logging"])
     {  
-    die(print_r(sqlsrv_errors() , true));  
-    }  
-  
-if (isset($_GET['action']))  
-    {  
-    if ($_GET['action'] == 'add')  
-        {  
-        /*Insert data.*/  
-        $insertSql = "INSERT INTO empTable (emp_id,name,education,email)   
-VALUES (?,?,?,?)";  
-        $params = array(&$_POST['t_emp_id'], &$_POST['t_name'], &$_POST['t_education'], &$_POST['t_email']  
-        );  
-        $stmt = sqlsrv_query($conn, $insertSql, $params);  
-        if ($stmt === false)  
-            {  
-            /*Handle the case of a duplicte e-mail address.*/  
-            $errors = sqlsrv_errors();  
-            if ($errors[0]['code'] == 2601)  
-                {  
-                echo "The e-mail address you entered has already been used.</br>";  
-                }  
-  
-            /*Die if other errors occurred.*/  
-              else  
-                {  
-                die(print_r($errors, true));  
-                }  
-            }  
-          else  
-            {  
-            echo "Registration complete.</br>";  
-            }  
-        }  
-    }  
-  
-/*Display registered people.*/  
-/*$sql = "SELECT * FROM empTable ORDER BY name"; 
-$stmt = sqlsrv_query($conn, $sql); 
-if($stmt === false) 
-{ 
-die(print_r(sqlsrv_errors(), true)); 
-} 
- 
-if(sqlsrv_has_rows($stmt)) 
-{ 
-print("<table border='1px'>"); 
-print("<tr><td>Emp Id</td>"); 
-print("<td>Name</td>"); 
-print("<td>education</td>"); 
-print("<td>Email</td></tr>"); 
- 
-while($row = sqlsrv_fetch_array($stmt)) 
-{ 
- 
-print("<tr><td>".$row['emp_id']."</td>"); 
-print("<td>".$row['name']."</td>"); 
-print("<td>".$row['education']."</td>"); 
-print("<td>".$row['email']."</td></tr>"); 
-} 
- 
-print("</table>"); 
-}*/  
-?>  
-</body>  
+    $_SESSION["logging"]=true;
+    loginform();
+    }
+       else if($_SESSION["logging"])
+       {
+         $number_of_rows=checkpass();
+         if($number_of_rows==1)
+            {	
+	         $_SESSION[user]=$_GET[userlogin];
+	         $_SESSION[logged]=true;
+	         print"<h1>you have loged in successfully</h1>";
+	         print_secure_content();
+            }
+            else{
+               	print "wrong pawssword or username, please try again";	
+                loginform();
+            }
+        }
+     }
+     
+function loginform()
+{
+print "please enter your login information to proceed with our site";
+print ("<table border='2'><tr><td>username</td><td><input type='text' name='userlogin' size'20'></td></tr><tr><td>password</td><td><input type='password' name='password' size'20'></td></tr></table>");
+print "<input type='submit' >";	
+print "<h3><a href='registerform.php'>register now!</a></h3>";	
+}
+
+function checkpass()
+{
+$servername="localhost";
+$username="root";
+$conn=  mysql_connect($servername,$username)or die(mysql_error());
+mysql_select_db("test",$conn);
+$sql="select * from users where name='$_GET[userlogin]' and password='$_GET[password]'";
+$result=mysql_query($sql,$conn) or die(mysql_error());
+return  mysql_num_rows($result);
+}
+
+function print_secure_content()
+{
+	print("<b><h1>hi mr.$_SESSION[user]</h1>");
+    print "<br><h2>only a logged in user can see this</h2><br><a href='logout.php'>Logout</a><br>";	
+	
+}
+?>
+
+</form>
+</body>
 </html>
